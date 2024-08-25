@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Order;
+use App\Http\Resources\OrderResource;
 
 class OrderController extends Controller
 {
@@ -13,7 +14,19 @@ class OrderController extends Controller
      */
     public function index()
     {
-        //
+        $ordersQuery = Order::orderBy('id', 'desc');
+        $ordersPaginator = $ordersQuery->paginate(3); // ページネーション
+        $orders = OrderResource::collection($ordersPaginator->items());
+        return response()->json([
+            'data' => $orders,
+            'meta' => [
+                'current_page' => $ordersPaginator->currentPage(),
+                'per_page' => $ordersPaginator->perPage(),
+                'total' => $ordersPaginator->total(),
+                'next_page_url' => $ordersPaginator->nextPageUrl(),
+                'prev_page_url' => $ordersPaginator->previousPageUrl(),
+            ],
+        ], 200);
     }
 
     /**
